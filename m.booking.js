@@ -7,7 +7,7 @@
  * 
  * history
  * 
- * 1.0   (2017.09.06) : 1 2 3
+ * 1.0   (2017.09.06) : 
  *
  */
 
@@ -149,12 +149,12 @@ $(document).ready(function () {
                 if (target.val().length === 4) {
                     var nextInput = target.closest('div').nextAll('div').filter(function () {return $(this).length > 0}).eq(0).find('input');
 
-                    //if (nextInput.length > 0) nextInput.select();
-                    if (nextInput.length > 0) {
-                        $(document).focus();
-                        setTimeout(function () {nextInput.focus();}, 3000);
-                    }
+                    nextInput.trigger('touchstart');
                 }
+            });
+		
+            input.on('touchstart', function () {
+                $(this).focus();
             });
         }
     }
