@@ -149,12 +149,8 @@ $(document).ready(function () {
                 if (target.val().length === 4) {
                     var nextInput = target.closest('div').nextAll('div').filter(function () {return $(this).length > 0}).eq(0).find('input');
 
-                    nextInput.trigger('touchstart');
+                    if (nextInput.length > 0) nextInput.select();
                 }
-            });
-		
-            input.on('touchstart', function () {
-                $(this).focus();
             });
         }
     }
