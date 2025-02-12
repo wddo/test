@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Swiper/9.1.0/swiper-bundle.js"></script>
+    <link rel="stylesheet" href="//unpkg.com/swiper@9.1.0/swiper-bundle.min.css" />
+
+    <style>
+      .swiper {
+        width: 100%;
+        height: 100%;
+      }
+    
+      .swiper-slide {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: bold;
+        color: #000;
+      }
+    
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="swiper mySwiper">
+        <div class="swiper-wrapper"></div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+      </div>
+    </div>
+
+    <script>
+      var swiper = new Swiper(".mySwiper", {
+        loop: false,
+        slidesPerView: 2.5,
+        virtual: {
+          slides: Array.from({length: 5}),
+          renderSlide: function (slide, index) {
+            return `<div class="swiper-slide"><a href="#" role="button">btn ${index}</a></div>`;
+          },
+        },
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+        pagination: {
+          el: '.swiper-pagination',
+          type: 'fraction',
+        },
+      });
+    </script>
+  </body>
+</html>
