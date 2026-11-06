@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, height=device-height" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      .wrap {
+        position: relative;
+        display: flex;
+      }
+
+      #froala-editor,
+      #froala-editor-mobile,
+      #preview {
+        width: 50%;
+      }
+
+      #preview {
+        /*860 + 2/820*/
+        /* display: none; */
+        position: absolute;
+        top: 0;
+        left: 21px;
+        width: calc(var(--w) - 42px - 5.5px);
+        z-index: 1;
+        background-color: pink;
+        opacity: 0.5;
+
+        pointer-events: none;
+        user-select: none;
+
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      #controls {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        z-index: 9999;
+      }
+
+      .wrap.latest #preview {
+        font-size: 13.89px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div id="froala-editor"></div>
+      <div id="froala-editor-mobile"></div>
+      <div id="preview" class="fr-view">
+        <p>
+          Start typing and you can preview the content of the WYSIWYG HTML
+          editor as you type below the editing box.
+        </p>
+      </div>
+    </div>
+    <div id="controls">
+      <button id="copy">copy</button>
+      <button id="toggle-preview">Toggle Preview</button>
+    </div>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"
+    ></script>
+    <script>
+      const { v } = Object.fromEntries(new URLSearchParams(location.search));
+      const version = v || "4.1.4";
+
+      function loadFroalaEditor(selector, options) {
+        const script = document.createElement("script");
+        script.src =
+          "https://cdn.jsdelivr.net/npm/froala-editor@" +
+          version +
+          "/js/froala_editor.pkgd.min.js";
+        script.type = "text/javascript";
+        script.onload = function () {
+          init();
+        };
+
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href =
+          "https://cdn.jsdelivr.net/npm/froala-editor@" +
+          version +
+          "/css/froala_editor.pkgd.min.css";
+
+        document.head.appendChild(link);
+        document.head.appendChild(script);
+      }
+
+      function resize() {
+        const w = $("#froala-editor .fr-view").outerWidth();
+
+        $("#preview").attr(
+          "style",
+          `
+          --w: ${w}px;
+          top: ${$("#froala-editor .fr-toolbar").outerHeight() + 20}px;
+        `,
+        );
+      }
+
+      function addEvent() {
+        $("#toggle-preview").on("click", function () {
+          $("#preview").toggle();
+        });
+
+        $("#copy").on("click", function () {
+          const $mobile = $("#froala-editor-mobile");
+
+          if ($mobile.length === 0) return;
+
+          const m = $mobile.get(0)["data-froala.editor"];
+          var pc = $("#froala-editor .fr-view").html();
+
+          $mobile.find(".fr-view").html(pc);
+          $mobile.find(".fr-wrapper").removeClass("show-placeholder");
+
+          m.events.trigger("contentChanged");
+        });
+
+        $(window).on("resize", function () {
+          resize();
+        });
+      }
+
+      function initFroala() {
+        if (version.startsWith("latest")) {
+          $(".wrap").addClass("latest");
+        }
+
+        new FroalaEditor("div#froala-editor", {
+          events: {
+            contentChanged: function () {
+              $("#preview").html(this.html.get());
+            },
+            initialized: function () {
+              resize();
+            },
+          },
+        });
+
+        new FroalaEditor("div#froala-editor-mobile", {
+          events: {
+            initialized: function () {
+              //const html = `<p style='margin-top:0cm;margin-right:0cm;margin-bottom:15.0pt;margin-left:0cm;border:none;padding:0cm;font-size:35px;font-family:"Calibri",sans-serif;color:#17365D;' data-pasted="true">Sample Document</p><p style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'>A demo DOCX file from samplelib.com.</p><h1 style='margin-top:24.0pt;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:115%;font-size:19px;font-family:"Calibri",sans-serif;color:#365F91;'>Introduction</h1><p style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'>This document shows the common building blocks of a Word file: headings, formatted text, lists, tables and images. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p><h1 style='margin-top:24.0pt;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:115%;font-size:19px;font-family:"Calibri",sans-serif;color:#365F91;'>Text Formatting</h1><p style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'>Runs can be <strong>bold</strong>, <em>italic</em>, <u>underlined</u><span style="color:#1F6FB5;">&nbsp;or coloured</span>. Font sizes vary too &mdash;&nbsp;<span style="font-size:21px;line-height:115%;">like this.</span></p><h1 style='margin-top:24.0pt;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:115%;font-size:19px;font-family:"Calibri",sans-serif;color:#365F91;'>Lists</h1><p style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'>Bulleted list:</p><div style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'><ul style="margin-bottom:0cm;list-style-type: disc;margin-left: 8px;"><li style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'>First bullet point</li><li style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'>Second bullet point</li><li style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'>Third bullet point</li></ul></div><p style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'>Numbered list:</p><div style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'><ol style="margin-bottom:0cm;list-style-type: decimal;margin-left: 8px;"><li style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'>First numbered step</li><li style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'>Second numbered step</li><li style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'>Third numbered step</li></ol></div><h1 style='margin-top:24.0pt;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:115%;font-size:19px;font-family:"Calibri",sans-serif;color:#365F91;'>Table</h1><table border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;border-width: medium;border-style: none;border-color: currentcolor;border-image: none;width: 576px;"><tbody><tr><td valign="top" style="width: 33.3333%; border-width: 1pt 1pt 2.25pt; border-style: solid; border-color: rgb(79, 129, 189); border-image: none; padding: 0cm 5.4pt; vertical-align: top;"><p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:normal;font-size:15px;font-family:"Cambria",serif;'><strong><span style='font-family:"Calibri",sans-serif;'>Product</span></strong></p></td><td valign="top" style="width: 33.3333%; border-width: 1pt 1pt 2.25pt medium; border-style: solid solid solid none; border-color: rgb(79, 129, 189) rgb(79, 129, 189) rgb(79, 129, 189) currentcolor; padding: 0cm 5.4pt; vertical-align: top;"><p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:normal;font-size:15px;font-family:"Cambria",serif;'><strong><span style='font-family:"Calibri",sans-serif;'>Quantity</span></strong></p></td><td valign="top" style="width: 33.3333%; border-width: 1pt 1pt 2.25pt medium; border-style: solid solid solid none; border-color: rgb(79, 129, 189) rgb(79, 129, 189) rgb(79, 129, 189) currentcolor; padding: 0cm 5.4pt; vertical-align: top;"><p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:normal;font-size:15px;font-family:"Cambria",serif;'><strong><span style='font-family:"Calibri",sans-serif;'>Price</span></strong></p></td></tr><tr><td valign="top" style="width: 33.3333%; border-width: medium 1pt 1pt; border-style: none solid solid; border-color: currentcolor rgb(79, 129, 189) rgb(79, 129, 189); border-image: none; background: rgb(211, 223, 238); padding: 0cm 5.4pt; vertical-align: top;"><p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:normal;font-size:15px;font-family:"Cambria",serif;'><strong><span style='font-family:"Calibri",sans-serif;color:black;'>Notebook</span></strong></p></td><td valign="top" style="width: 33.3333%; border-width: medium 1pt 1pt medium; border-style: none solid solid none; border-color: currentcolor rgb(79, 129, 189) rgb(79, 129, 189) currentcolor; background: rgb(211, 223, 238); padding: 0cm 5.4pt; vertical-align: top;"><p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:normal;font-size:15px;font-family:"Cambria",serif;'><span style="color:black;">3</span></p></td><td valign="top" style="width: 33.3333%; border-width: medium 1pt 1pt medium; border-style: none solid solid none; border-color: currentcolor rgb(79, 129, 189) rgb(79, 129, 189) currentcolor; background: rgb(211, 223, 238); padding: 0cm 5.4pt; vertical-align: top;"><p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:normal;font-size:15px;font-family:"Cambria",serif;'><span style="color:black;">$24.00</span></p></td></tr><tr><td valign="top" style="width: 33.3333%; border-width: medium 1pt 1pt; border-style: none solid solid; border-color: currentcolor rgb(79, 129, 189) rgb(79, 129, 189); border-image: none; padding: 0cm 5.4pt; vertical-align: top;"><p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:normal;font-size:15px;font-family:"Cambria",serif;'><strong><span style='font-family:"Calibri",sans-serif;'>Pen</span></strong></p></td><td valign="top" style="width: 33.3333%; border-width: medium 1pt 1pt medium; border-style: none solid solid none; border-color: currentcolor rgb(79, 129, 189) rgb(79, 129, 189) currentcolor; padding: 0cm 5.4pt; vertical-align: top;"><p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:normal;font-size:15px;font-family:"Cambria",serif;'>12</p></td><td valign="top" style="width: 33.3333%; border-width: medium 1pt 1pt medium; border-style: none solid solid none; border-color: currentcolor rgb(79, 129, 189) rgb(79, 129, 189) currentcolor; padding: 0cm 5.4pt; vertical-align: top;"><p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:normal;font-size:15px;font-family:"Cambria",serif;'>$9.60</p></td></tr><tr><td valign="top" style="width: 33.3333%; border-width: medium 1pt 1pt; border-style: none solid solid; border-color: currentcolor rgb(79, 129, 189) rgb(79, 129, 189); border-image: none; background: rgb(211, 223, 238); padding: 0cm 5.4pt; vertical-align: top;"><p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:normal;font-size:15px;font-family:"Cambria",serif;'><strong><span style='font-family:"Calibri",sans-serif;color:black;'>Marker</span></strong></p></td><td valign="top" style="width: 33.3333%; border-width: medium 1pt 1pt medium; border-style: none solid solid none; border-color: currentcolor rgb(79, 129, 189) rgb(79, 129, 189) currentcolor; background: rgb(211, 223, 238); padding: 0cm 5.4pt; vertical-align: top;"><p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:normal;font-size:15px;font-family:"Cambria",serif;'><span style="color:black;">5</span></p></td><td valign="top" style="width: 33.3333%; border-width: medium 1pt 1pt medium; border-style: none solid solid none; border-color: currentcolor rgb(79, 129, 189) rgb(79, 129, 189) currentcolor; background: rgb(211, 223, 238); padding: 0cm 5.4pt; vertical-align: top;"><p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:normal;font-size:15px;font-family:"Cambria",serif;'><span style="color:black;">$11.25</span></p></td></tr></tbody></table><h1 style='margin-top:24.0pt;margin-right:0cm;margin-bottom:0cm;margin-left:0cm;line-height:115%;font-size:19px;font-family:"Calibri",sans-serif;color:#365F91;'>Image</h1><p style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'>An embedded raster image:</p><p style='margin-top:0cm;margin-right:0cm;margin-bottom:10.0pt;margin-left:0cm;line-height:115%;font-size:15px;font-family:"Cambria",serif;'><img width="528" height="235" src="blob:http://localhost:5500/f11d3e7c-1924-47a1-9c90-754530f00a1b" class="fr-fic fr-dii"></p>`;
+              //this.html.set(html);
+            },
+          },
+        });
+      }
+
+      function init() {
+        initFroala();
+        addEvent();
+      }
+
+      $(function () {
+        loadFroalaEditor();
+      });
+    </script>
+  </body>
+</html>
